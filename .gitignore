@@ -1,32 +1,54 @@
-# Prerequisites
-*.d
+# JUCE + Visual Studio + Windows
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
+# Build output
+Build/
+build/
+*.exe
+*.app
 *.so
 *.dylib
 *.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
 *.lib
+*.obj
+*.pdb
+*.ipch
+*.exp
 
-# Executables
-*.exe
-*.out
-*.app
+# Visual Studio files
+*.sdf
+*.suo
+*.user
+*.VC.db
+*.VC.opendb
+.vscode/
+*.aps
+*.ncb
+*.log
+
+# JUCE-generated settings
+.juce/
+*.jucer
+*.autosave
+
+# OS and IDE temp files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+*.tmp
+*.bak
+
+# CMake cache files (if using CMake with JUCE)
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Crash dumps and diagnostics
+*.dmp
+
+# Hidden system folders
+.idea/
+*.swp
+*.swn
+*.swo

@@ -688,6 +688,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\SamplerEngine.cpp">
+      <Filter>MainStageSampler\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\SampleSound.cpp">
+      <Filter>MainStageSampler\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\SampleVoice.cpp">
+      <Filter>MainStageSampler\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\SFZLoader.cpp">
+      <Filter>MainStageSampler\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Main.cpp">
       <Filter>MainStageSampler\Source</Filter>
     </ClCompile>
@@ -3657,6 +3669,18 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\SamplerEngine.h">
+      <Filter>MainStageSampler\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\SampleSound.h">
+      <Filter>MainStageSampler\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\SampleVoice.h">
+      <Filter>MainStageSampler\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\SFZLoader.h">
+      <Filter>MainStageSampler\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\MainComponent.h">
       <Filter>MainStageSampler\Source</Filter>
     </ClInclude>
