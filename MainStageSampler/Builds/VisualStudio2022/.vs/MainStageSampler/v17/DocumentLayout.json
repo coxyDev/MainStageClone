@@ -1,52 +1,12 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\Joel.Cox\\OneDrive - Brisbane Catholic Education\\Documents\\Projects\\MainStageClone\\MainStageSampler\\Builds\\VisualStudio2022\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{6B37C520-8F1D-23AA-D75D-5F9FB4C4D4AB}|MainStageSampler_App.vcxproj|C:\\Users\\Joel.Cox\\OneDrive - Brisbane Catholic Education\\Documents\\Projects\\MainStageClone\\MainStageSampler\\Source\\SamplerEngine.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6B37C520-8F1D-23AA-D75D-5F9FB4C4D4AB}|MainStageSampler_App.vcxproj|C:\\Users\\Joel.Cox\\OneDrive - Brisbane Catholic Education\\Documents\\Projects\\MainStageClone\\MainStageSampler\\Source\\SamplerEngine.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": [
-        {
-          "DockedWidth": 200,
-          "SelectedChildIndex": 0,
-          "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "SamplerEngine.cpp",
-              "DocumentMoniker": "C:\\Users\\Joel.Cox\\OneDrive - Brisbane Catholic Education\\Documents\\Projects\\MainStageClone\\MainStageSampler\\Source\\SamplerEngine.cpp",
-              "RelativeDocumentMoniker": "..\\..\\Source\\SamplerEngine.cpp",
-              "ToolTip": "C:\\Users\\Joel.Cox\\OneDrive - Brisbane Catholic Education\\Documents\\Projects\\MainStageClone\\MainStageSampler\\Source\\SamplerEngine.cpp",
-              "RelativeToolTip": "..\\..\\Source\\SamplerEngine.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-06-06T02:13:26.111Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "SamplerEngine.h",
-              "DocumentMoniker": "C:\\Users\\Joel.Cox\\OneDrive - Brisbane Catholic Education\\Documents\\Projects\\MainStageClone\\MainStageSampler\\Source\\SamplerEngine.h",
-              "RelativeDocumentMoniker": "..\\..\\Source\\SamplerEngine.h",
-              "ToolTip": "C:\\Users\\Joel.Cox\\OneDrive - Brisbane Catholic Education\\Documents\\Projects\\MainStageClone\\MainStageSampler\\Source\\SamplerEngine.h",
-              "RelativeToolTip": "..\\..\\Source\\SamplerEngine.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-06-06T02:13:03.9Z",
-              "EditorCaption": ""
-            }
-          ]
-        }
-      ]
+      "DocumentGroups": []
     }
   ]
 }
