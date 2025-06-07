@@ -25,7 +25,7 @@ juce::Array<SampleSound::Ptr> SFZLoader::loadSFZ(const juce::File& sfzFile)
 
     if (!sfzFile.exists())
     {
-        juce::AlertWindow::showMessageBox(juce::AlertWindow::WarningIcon,
+        juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
             "File Not Found",
             "SFZ file does not exist: " + sfzFile.getFullPathName());
         return sounds;
@@ -40,6 +40,12 @@ juce::Array<SampleSound::Ptr> SFZLoader::loadSFZ(const juce::File& sfzFile)
     for (const auto& line : lines)
     {
         parseLine(line.trim(), currentRegion, regions);
+    }
+
+    // Add the final region if it has a sample
+    if (currentRegion.sample.isNotEmpty())
+    {
+        regions.add(currentRegion);
     }
 
     // Create SampleSound objects from regions
@@ -110,24 +116,6 @@ void SFZLoader::parseLine(const juce::String& line, SFZRegion& currentRegion,
             else if (key == "ampeg_release")
                 currentRegion.ampeg_release = value.getDoubleValue();
         }
-    }
-
-    // Add the last region if we reach the end
-    if (currentRegion.sample.isNotEmpty())
-    {
-        bool found = false;
-        for (const auto& region : regions)
-        {
-            if (region.sample == currentRegion.sample &&
-                region.lokey == currentRegion.lokey &&
-                region.hikey == currentRegion.hikey)
-            {
-                found = true;
-                break;
-            }
-        }
-        if (!found)
-            regions.add(currentRegion);
     }
 }
 

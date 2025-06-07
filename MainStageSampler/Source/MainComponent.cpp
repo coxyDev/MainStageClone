@@ -25,8 +25,23 @@ MainComponent::MainComponent()
     volumeLabel.attachToComponent(&volumeSlider, true);
     addAndMakeVisible(volumeLabel);
 
+    // Set up the library combo box
+    libraryComboBox.addListener(this);
+    addAndMakeVisible(libraryComboBox);
+
+    libraryLabel.setText("Library", juce::dontSendNotification);
+    libraryLabel.attachToComponent(&libraryComboBox, true);
+    addAndMakeVisible(libraryLabel);
+
+    // Populate the library list
+    refreshLibraryList();
+
     // Set up the keyboard component
     addAndMakeVisible(keyboardComponent);
+
+    // Enable keyboard focus for computer keyboard input
+    setWantsKeyboardFocus(true);
+    addKeyListener(this);
 
     // Set the window size
     setSize(800, 600);
@@ -104,7 +119,8 @@ void MainComponent::resized()
     loadButton.setBounds(20, 100, 120, 30);
     statusLabel.setBounds(160, 100, 400, 30);
 
-    volumeSlider.setBounds(80, 140, 200, 30);
+    libraryComboBox.setBounds(80, 140, 200, 25);
+    volumeSlider.setBounds(80, 170, 200, 30);
 
     // Bottom section for keyboard
     keyboardComponent.setBounds(bounds.removeFromBottom(100));
@@ -138,14 +154,21 @@ void MainComponent::buttonClicked(juce::Button* button)
 {
     if (button == &loadButton)
     {
-        juce::FileChooser chooser("Select an SFZ file to load...",
+        auto chooserFlags = juce::FileBrowserComponent::openMode
+            | juce::FileBrowserComponent::canSelectFiles;
+
+        fileChooser = std::make_unique<juce::FileChooser>("Select an SFZ file to load...",
             juce::File(),
             "*.sfz");
 
-        if (chooser.browseForFileToOpen())
-        {
-            loadSFZFile(chooser.getResult());
-        }
+        fileChooser->launchAsync(chooserFlags, [this](const juce::FileChooser& fc)
+            {
+                auto file = fc.getResult();
+                if (file.exists())
+                {
+                    loadSFZFile(file);
+                }
+            });
     }
 }
 
@@ -170,4 +193,93 @@ void MainComponent::loadSFZFile(const juce::File& file)
 void MainComponent::updateStatusLabel(const juce::String& message)
 {
     statusLabel.setText(message, juce::dontSendNotification);
+}
+
+void MainComponent::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
+{
+    if (comboBoxThatHasChanged == &libraryComboBox)
+    {
+        auto selectedId = libraryComboBox.getSelectedId();
+        if (selectedId > 0)
+        {
+            auto sfzFiles = SampleManager::findAvailableSFZFiles();
+            if (selectedId <= sfzFiles.size())
+            {
+                loadSFZFile(juce::File(sfzFiles[selectedId - 1]));
+            }
+        }
+    }
+}
+
+void MainComponent::refreshLibraryList()
+{
+    libraryComboBox.clear();
+    libraryComboBox.addItem("Select a library...", -1);
+
+    auto sfzFiles = SampleManager::findAvailableSFZFiles();
+
+    for (int i = 0; i < sfzFiles.size(); ++i)
+    {
+        auto file = juce::File(sfzFiles[i]);
+        auto libraryName = SampleManager::getLibraryNameFromFile(file);
+        libraryComboBox.addItem(libraryName, i + 1);
+    }
+
+    if (sfzFiles.isEmpty())
+    {
+        libraryComboBox.addItem("No libraries found", -2);
+        updateStatusLabel("Place SFZ files in the Samples folder");
+    }
+}
+
+bool MainComponent::keyPressed(const juce::KeyPress& key, juce::Component* /*originatingComponent*/)
+{
+    // Map computer keyboard to piano keys
+    // Using a piano-like layout: AWSEDFTGYHUJK... (white keys on QWERTY, black keys on top row)
+
+    int midiNote = -1;
+    int baseNote = 60; // Middle C
+
+    // White keys (lower row)
+    if (key.getKeyCode() == 'A') midiNote = baseNote;      // C
+    else if (key.getKeyCode() == 'S') midiNote = baseNote + 2;  // D
+    else if (key.getKeyCode() == 'D') midiNote = baseNote + 4;  // E
+    else if (key.getKeyCode() == 'F') midiNote = baseNote + 5;  // F
+    else if (key.getKeyCode() == 'G') midiNote = baseNote + 7;  // G
+    else if (key.getKeyCode() == 'H') midiNote = baseNote + 9;  // A
+    else if (key.getKeyCode() == 'J') midiNote = baseNote + 11; // B
+    else if (key.getKeyCode() == 'K') midiNote = baseNote + 12; // C (octave up)
+
+    // Black keys (upper row)
+    else if (key.getKeyCode() == 'W') midiNote = baseNote + 1;  // C#
+    else if (key.getKeyCode() == 'E') midiNote = baseNote + 3;  // D#
+    else if (key.getKeyCode() == 'T') midiNote = baseNote + 6;  // F#
+    else if (key.getKeyCode() == 'Y') midiNote = baseNote + 8;  // G#
+    else if (key.getKeyCode() == 'U') midiNote = baseNote + 10; // A#
+
+    // Lower octave
+    else if (key.getKeyCode() == 'Z') midiNote = baseNote - 12; // C (octave down)
+    else if (key.getKeyCode() == 'X') midiNote = baseNote - 10; // D
+    else if (key.getKeyCode() == 'C') midiNote = baseNote - 8;  // E
+    else if (key.getKeyCode() == 'V') midiNote = baseNote - 7;  // F
+    else if (key.getKeyCode() == 'B') midiNote = baseNote - 5;  // G
+    else if (key.getKeyCode() == 'N') midiNote = baseNote - 3;  // A
+    else if (key.getKeyCode() == 'M') midiNote = baseNote - 1;  // B
+
+    if (midiNote >= 0 && midiNote <= 127)
+    {
+        keyboardState.noteOn(1, midiNote, 0.8f);
+        keyboardComponent.grabKeyboardFocus(); // Update visual keyboard
+        return true;
+    }
+
+    return false;
+}
+
+bool MainComponent::keyStateChanged(bool /*isKeyDown*/, juce::Component* /*originatingComponent*/)
+{
+    // Handle key releases - turn off all notes when any key is released
+    // This is a simple approach; you could make it more sophisticated
+    keyboardState.allNotesOff(1);
+    return true;
 }

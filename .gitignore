@@ -1,7 +1,7 @@
 # JUCE + Visual Studio + Windows
 
 # Build output
-Build/
+Builds/
 build/
 *.exe
 *.app
@@ -52,3 +52,6 @@ Makefile
 *.swp
 *.swn
 *.swo
+
+# Samples
+*.flac

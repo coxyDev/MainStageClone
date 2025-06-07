@@ -4,6 +4,9 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
   <MAINGROUP id="bhH1O0" name="MainStageSampler">
     <GROUP id="{F1E21858-4610-E3C8-1D40-A28F26A6A870}" name="Source">
+      <FILE id="FsNLtz" name="SampleManager.cpp" compile="1" resource="0"
+            file="Source/SampleManager.cpp"/>
+      <FILE id="X29q3C" name="SampleManager.h" compile="0" resource="0" file="Source/SampleManager.h"/>
       <FILE id="whVX4L" name="SamplerEngine.cpp" compile="1" resource="0"
             file="Source/SamplerEngine.cpp"/>
       <FILE id="iOdRen" name="SamplerEngine.h" compile="0" resource="0" file="Source/SamplerEngine.h"/>

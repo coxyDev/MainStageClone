@@ -1,0 +1,73 @@
+cmake_minimum_required(VERSION 3.15)
+
+project(MainStageSampler VERSION 1.0.0)
+
+# Set C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Find JUCE (looks for global installation)
+find_package(JUCE CONFIG REQUIRED)
+
+# Or if that doesn't work, specify the path manually:
+# set(JUCE_DIR "C:/JUCE/lib/cmake/JUCE")
+# find_package(JUCE CONFIG REQUIRED)
+
+# Create the application target
+juce_add_gui_app(MainStageSampler
+    COMPANY_NAME "YourCompanyName"
+    PRODUCT_NAME "MainStage Sampler"
+    VERSION 1.0.0
+    BUNDLE_ID "com.yourcompany.mainstagesampler")
+
+# Add source files
+target_sources(MainStageSampler PRIVATE
+    Source/Main.cpp
+    Source/MainComponent.cpp
+    Source/SamplerEngine.cpp
+    Source/SFZLoader.cpp
+    Source/SampleSound.cpp
+    Source/SampleVoice.cpp)
+
+# Include directories
+target_include_directories(MainStageSampler PRIVATE Source)
+
+# Link JUCE modules
+target_link_libraries(MainStageSampler PRIVATE
+    juce::juce_audio_utils
+    juce::juce_audio_devices
+    juce::juce_audio_formats
+    juce::juce_audio_processors
+    juce::juce_core
+    juce::juce_data_structures
+    juce::juce_events
+    juce::juce_graphics
+    juce::juce_gui_basics
+    juce::juce_gui_extra)
+
+# Compiler definitions
+target_compile_definitions(MainStageSampler PRIVATE
+    JUCE_WEB_BROWSER=0
+    JUCE_USE_CURL=0
+    JUCE_APPLICATION_NAME_STRING="$<TARGET_PROPERTY:MainStageSampler,JUCE_PRODUCT_NAME>"
+    JUCE_APPLICATION_VERSION_STRING="$<TARGET_PROPERTY:MainStageSampler,JUCE_VERSION>"
+    JUCE_DISPLAY_SPLASH_SCREEN=0)
+
+# Windows-specific settings
+if(WIN32)
+    target_compile_definitions(MainStageSampler PRIVATE
+        JUCE_WASAPI=1
+        JUCE_DIRECTSOUND=1
+        JUCE_ASIO=1)
+endif()
+
+# Disable warnings from JUCE
+if(MSVC)
+    target_compile_options(MainStageSampler PRIVATE /W3)
+else()
+    target_compile_options(MainStageSampler PRIVATE -Wall -Wextra -Wno-unused-parameter)
+endif()
+
+# Set output directory
+set_target_properties(MainStageSampler PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
