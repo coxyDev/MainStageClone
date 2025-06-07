@@ -146,13 +146,11 @@
     <Lib/>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\EnhancedSFZLoader.cpp"/>
     <ClCompile Include="..\..\Source\ProPianoInterface.cpp"/>
-    <ClCompile Include="..\..\Source\PianoInterface.cpp"/>
-    <ClCompile Include="..\..\Source\SampleManager.cpp"/>
     <ClCompile Include="..\..\Source\SamplerEngine.cpp"/>
     <ClCompile Include="..\..\Source\SampleSound.cpp"/>
     <ClCompile Include="..\..\Source\SampleVoice.cpp"/>
-    <ClCompile Include="..\..\Source\SFZLoader.cpp"/>
     <ClCompile Include="..\..\Source\Main.cpp"/>
     <ClCompile Include="..\..\Source\MainComponent.cpp"/>
     <ClCompile Include="..\..\..\..\..\..\..\..\JUCE\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.cpp">
@@ -2945,13 +2943,11 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\EnhancedSFZLoader.h"/>
     <ClInclude Include="..\..\Source\ProPianoInterface.h"/>
-    <ClInclude Include="..\..\Source\PianoInterface.h"/>
-    <ClInclude Include="..\..\Source\SampleManager.h"/>
     <ClInclude Include="..\..\Source\SamplerEngine.h"/>
     <ClInclude Include="..\..\Source\SampleSound.h"/>
     <ClInclude Include="..\..\Source\SampleVoice.h"/>
-    <ClInclude Include="..\..\Source\SFZLoader.h"/>
     <ClInclude Include="..\..\Source\MainComponent.h"/>
     <ClInclude Include="..\..\..\..\..\..\..\..\JUCE\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h"/>
     <ClInclude Include="..\..\..\..\..\..\..\..\JUCE\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h"/>

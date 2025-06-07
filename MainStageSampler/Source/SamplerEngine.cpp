@@ -1,7 +1,7 @@
 #include "SamplerEngine.h"
 #include "SampleVoice.h"
 #include "SampleSound.h"
-#include "SFZLoader.h"
+#include "EnhancedSFZLoader.h"
 
 SamplerEngine::SamplerEngine()
 {
@@ -14,7 +14,7 @@ SamplerEngine::~SamplerEngine()
 {
 }
 
-void SamplerEngine::prepareToPlay(double sampleRate, int samplesPerBlock)
+void SamplerEngine::prepareToPlay(double sampleRate, int /*samplesPerBlock*/)
 {
     synth.setCurrentPlaybackSampleRate(sampleRate);
 }
@@ -48,8 +48,8 @@ void SamplerEngine::loadSampleSet(const juce::File& sfzFile)
     // Clear existing sounds
     synth.clearSounds();
 
-    // Load the SFZ file
-    SFZLoader loader;
+    // Load the SFZ file with enhanced parser
+    EnhancedSFZLoader loader;
     auto sounds = loader.loadSFZ(sfzFile);
 
     // Add sounds to the synthesiser
@@ -58,5 +58,5 @@ void SamplerEngine::loadSampleSet(const juce::File& sfzFile)
         synth.addSound(sound);
     }
 
-    juce::Logger::writeToLog("Loaded " + juce::String(sounds.size()) + " samples from " + sfzFile.getFileName());
+    juce::Logger::writeToLog("Enhanced SFZ Loader: Loaded " + juce::String(sounds.size()) + " samples from " + sfzFile.getFileName());
 }

@@ -688,13 +688,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\EnhancedSFZLoader.cpp">
+      <Filter>MainStageSampler\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\ProPianoInterface.cpp">
-      <Filter>MainStageSampler\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\PianoInterface.cpp">
-      <Filter>MainStageSampler\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\SampleManager.cpp">
       <Filter>MainStageSampler\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\SamplerEngine.cpp">
@@ -704,9 +701,6 @@
       <Filter>MainStageSampler\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\SampleVoice.cpp">
-      <Filter>MainStageSampler\Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\SFZLoader.cpp">
       <Filter>MainStageSampler\Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Main.cpp">
@@ -3678,13 +3672,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\EnhancedSFZLoader.h">
+      <Filter>MainStageSampler\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\ProPianoInterface.h">
-      <Filter>MainStageSampler\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\PianoInterface.h">
-      <Filter>MainStageSampler\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\SampleManager.h">
       <Filter>MainStageSampler\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\SamplerEngine.h">
@@ -3694,9 +3685,6 @@
       <Filter>MainStageSampler\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\SampleVoice.h">
-      <Filter>MainStageSampler\Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\SFZLoader.h">
       <Filter>MainStageSampler\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\MainComponent.h">

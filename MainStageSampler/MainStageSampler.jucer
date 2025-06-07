@@ -4,17 +4,14 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
   <MAINGROUP id="bhH1O0" name="MainStageSampler">
     <GROUP id="{F1E21858-4610-E3C8-1D40-A28F26A6A870}" name="Source">
+      <FILE id="F5pn9T" name="EnhancedSFZLoader.cpp" compile="1" resource="0"
+            file="Source/EnhancedSFZLoader.cpp"/>
+      <FILE id="n6EG6w" name="EnhancedSFZLoader.h" compile="0" resource="0"
+            file="Source/EnhancedSFZLoader.h"/>
       <FILE id="yGDbts" name="ProPianoInterface.cpp" compile="1" resource="0"
             file="Source/ProPianoInterface.cpp"/>
       <FILE id="Ly1EGg" name="ProPianoInterface.h" compile="0" resource="0"
             file="Source/ProPianoInterface.h"/>
-      <FILE id="dSU1r3" name="PianoInterface.cpp" compile="1" resource="0"
-            file="Source/PianoInterface.cpp"/>
-      <FILE id="dhUyUG" name="PianoInterface.h" compile="0" resource="0"
-            file="Source/PianoInterface.h"/>
-      <FILE id="FsNLtz" name="SampleManager.cpp" compile="1" resource="0"
-            file="Source/SampleManager.cpp"/>
-      <FILE id="X29q3C" name="SampleManager.h" compile="0" resource="0" file="Source/SampleManager.h"/>
       <FILE id="whVX4L" name="SamplerEngine.cpp" compile="1" resource="0"
             file="Source/SamplerEngine.cpp"/>
       <FILE id="iOdRen" name="SamplerEngine.h" compile="0" resource="0" file="Source/SamplerEngine.h"/>
@@ -22,8 +19,6 @@
       <FILE id="DYTj1R" name="SampleSound.h" compile="0" resource="0" file="Source/SampleSound.h"/>
       <FILE id="XZcEXT" name="SampleVoice.cpp" compile="1" resource="0" file="Source/SampleVoice.cpp"/>
       <FILE id="huDSyO" name="SampleVoice.h" compile="0" resource="0" file="Source/SampleVoice.h"/>
-      <FILE id="j83hhb" name="SFZLoader.cpp" compile="1" resource="0" file="Source/SFZLoader.cpp"/>
-      <FILE id="ucn5ZZ" name="SFZLoader.h" compile="0" resource="0" file="Source/SFZLoader.h"/>
       <FILE id="kz1xq7" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="Xwl7Vp" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="xmJzhV" name="MainComponent.cpp" compile="1" resource="0"
