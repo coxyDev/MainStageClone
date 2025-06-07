@@ -688,6 +688,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\ProPianoInterface.cpp">
+      <Filter>MainStageSampler\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\PianoInterface.cpp">
+      <Filter>MainStageSampler\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\SampleManager.cpp">
       <Filter>MainStageSampler\Source</Filter>
     </ClCompile>
@@ -3672,6 +3678,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\ProPianoInterface.h">
+      <Filter>MainStageSampler\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\PianoInterface.h">
+      <Filter>MainStageSampler\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\SampleManager.h">
       <Filter>MainStageSampler\Source</Filter>
     </ClInclude>

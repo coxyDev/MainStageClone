@@ -146,6 +146,8 @@
     <Lib/>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\ProPianoInterface.cpp"/>
+    <ClCompile Include="..\..\Source\PianoInterface.cpp"/>
     <ClCompile Include="..\..\Source\SampleManager.cpp"/>
     <ClCompile Include="..\..\Source\SamplerEngine.cpp"/>
     <ClCompile Include="..\..\Source\SampleSound.cpp"/>
@@ -2943,6 +2945,8 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\ProPianoInterface.h"/>
+    <ClInclude Include="..\..\Source\PianoInterface.h"/>
     <ClInclude Include="..\..\Source\SampleManager.h"/>
     <ClInclude Include="..\..\Source\SamplerEngine.h"/>
     <ClInclude Include="..\..\Source\SampleSound.h"/>

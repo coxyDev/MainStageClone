@@ -2,17 +2,18 @@
 
 #include <JuceHeader.h>
 #include "SamplerEngine.h"
+#include "ProPianoInterface.h"
 
 //==============================================================================
 /*
-    This component lives inside our window, and this is where you should put all
-    your controls and content.
+    Main application component with UVI-style piano interface
 */
 class MainComponent : public juce::Component,
     public juce::FileDragAndDropTarget,
     public juce::Button::Listener,
     public juce::KeyListener,
-    public juce::AudioIODeviceCallback
+    public juce::AudioIODeviceCallback,
+    public juce::ComboBox::Listener
 {
 public:
     //==============================================================================
@@ -24,7 +25,7 @@ public:
     void resized() override;
 
     //==============================================================================
-    // Audio callbacks - using the correct JUCE 7+ signature
+    // Audio callbacks
     void audioDeviceIOCallbackWithContext(const float* const* inputChannelData,
         int numInputChannels,
         float* const* outputChannelData,
@@ -41,8 +42,9 @@ public:
     void filesDropped(const juce::StringArray& files, int x, int y) override;
 
     //==============================================================================
-    // Button handling
+    // UI callbacks
     void buttonClicked(juce::Button* button) override;
+    void comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged) override;
 
     // Keyboard handling
     bool keyPressed(const juce::KeyPress& key, juce::Component* originatingComponent) override;
@@ -54,21 +56,24 @@ private:
     juce::AudioDeviceManager audioDeviceManager;
     SamplerEngine samplerEngine;
     juce::MidiKeyboardState keyboardState;
-    juce::MidiKeyboardComponent keyboardComponent;
 
     // UI Components
+    std::unique_ptr<ProPianoInterface> pianoInterface;
+    juce::TabbedComponent interfaceTabs;
+
+    // Utility controls (minimal top bar)
     juce::TextButton loadButton;
     juce::TextButton audioSettingsButton;
     juce::Label statusLabel;
-    juce::Label audioStatusLabel;
-    juce::Slider volumeSlider;
-    juce::Label volumeLabel;
+    juce::ComboBox modeComboBox;
+    juce::Label modeLabel;
 
     // File chooser
     std::unique_ptr<juce::FileChooser> fileChooser;
 
-    // Current loaded file
+    // Current state
     juce::File currentSFZFile;
+    float masterVolume = 0.8f;
 
     //==============================================================================
     void loadSFZFile(const juce::File& file);
@@ -76,6 +81,8 @@ private:
     void initializeAudio();
     void showAudioSettings();
     void updateAudioStatus();
+    void switchToPerformanceMode();
+    void switchToEngineMode();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
