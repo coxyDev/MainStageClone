@@ -9,10 +9,20 @@ MainComponent::MainComponent()
     loadButton.addListener(this);
     addAndMakeVisible(loadButton);
 
+    // Set up the audio settings button
+    audioSettingsButton.setButtonText("Audio Settings");
+    audioSettingsButton.addListener(this);
+    addAndMakeVisible(audioSettingsButton);
+
     // Set up the status label
     statusLabel.setText("Ready to load SFZ file...", juce::dontSendNotification);
     statusLabel.setJustificationType(juce::Justification::centred);
     addAndMakeVisible(statusLabel);
+
+    // Set up the audio status label
+    audioStatusLabel.setText("Initializing audio...", juce::dontSendNotification);
+    audioStatusLabel.setJustificationType(juce::Justification::left);
+    addAndMakeVisible(audioStatusLabel);
 
     // Set up the volume slider
     volumeSlider.setRange(0.0, 1.0);
@@ -25,17 +35,6 @@ MainComponent::MainComponent()
     volumeLabel.attachToComponent(&volumeSlider, true);
     addAndMakeVisible(volumeLabel);
 
-    // Set up the library combo box
-    libraryComboBox.addListener(this);
-    addAndMakeVisible(libraryComboBox);
-
-    libraryLabel.setText("Library", juce::dontSendNotification);
-    libraryLabel.attachToComponent(&libraryComboBox, true);
-    addAndMakeVisible(libraryLabel);
-
-    // Populate the library list
-    refreshLibraryList();
-
     // Set up the keyboard component
     addAndMakeVisible(keyboardComponent);
 
@@ -44,52 +43,174 @@ MainComponent::MainComponent()
     addKeyListener(this);
 
     // Set the window size
-    setSize(800, 600);
+    setSize(1000, 600);
 
-    // Set up audio
-    if (juce::RuntimePermissions::isRequired(juce::RuntimePermissions::recordAudio)
-        && !juce::RuntimePermissions::isGranted(juce::RuntimePermissions::recordAudio))
-    {
-        juce::RuntimePermissions::request(juce::RuntimePermissions::recordAudio,
-            [&](bool granted) { setAudioChannels(granted ? 2 : 0, 2); });
-    }
-    else
-    {
-        setAudioChannels(2, 2);
-    }
+    // Initialize audio
+    initializeAudio();
+    updateAudioStatus();
 }
 
 MainComponent::~MainComponent()
 {
-    shutdownAudio();
+    audioDeviceManager.removeAudioCallback(this);
+    audioDeviceManager.closeAudioDevice();
 }
 
 //==============================================================================
-void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
+void MainComponent::initializeAudio()
 {
-    samplerEngine.prepareToPlay(sampleRate, samplesPerBlockExpected);
-    keyboardState.reset();
+    // Initialize the audio device manager with multiple driver types
+    audioDeviceManager.initialiseWithDefaultDevices(0, 2);
+
+    // Add this component as an audio callback
+    audioDeviceManager.addAudioCallback(this);
+
+    DBG("Audio device manager initialized");
+
+    auto& deviceTypes = audioDeviceManager.getAvailableDeviceTypes();
+    for (auto* type : deviceTypes)
+    {
+        DBG("Available audio device type: " + type->getTypeName());
+    }
+
+    if (auto* currentDevice = audioDeviceManager.getCurrentAudioDevice())
+    {
+        DBG("Current audio device: " + currentDevice->getName());
+        DBG("Sample rate: " + juce::String(currentDevice->getCurrentSampleRate()));
+        DBG("Buffer size: " + juce::String(currentDevice->getCurrentBufferSizeSamples()));
+    }
+    else
+    {
+        DBG("No audio device found!");
+    }
 }
 
-void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
+void MainComponent::audioDeviceIOCallbackWithContext(const float* const* /*inputChannelData*/,
+    int /*numInputChannels*/,
+    float* const* outputChannelData,
+    int numOutputChannels,
+    int numSamples,
+    const juce::AudioIODeviceCallbackContext& /*context*/)
 {
-    bufferToFill.clearActiveBufferRegion();
+    // Clear output buffers first
+    for (int channel = 0; channel < numOutputChannels; ++channel)
+    {
+        if (outputChannelData[channel] != nullptr)
+            juce::FloatVectorOperations::clear(outputChannelData[channel], numSamples);
+    }
 
-    juce::MidiBuffer incomingMidi;
-    keyboardState.processNextMidiBuffer(incomingMidi, bufferToFill.startSample,
-        bufferToFill.numSamples, true);
+    // Create audio buffer from output data
+    juce::AudioBuffer<float> buffer(outputChannelData, numOutputChannels, numSamples);
 
-    samplerEngine.renderNextBlock(*bufferToFill.buffer, incomingMidi,
-        bufferToFill.startSample, bufferToFill.numSamples);
+    // Create MIDI buffer from keyboard state
+    juce::MidiBuffer midiBuffer;
+    keyboardState.processNextMidiBuffer(midiBuffer, 0, numSamples, true);
+
+    // Debug MIDI messages
+    if (!midiBuffer.isEmpty())
+    {
+        DBG("MIDI buffer has " + juce::String(midiBuffer.getNumEvents()) + " events");
+        for (const auto metadata : midiBuffer)
+        {
+            auto message = metadata.getMessage();
+            if (message.isNoteOn())
+                DBG("MIDI Note ON: " + juce::String(message.getNoteNumber()) + " velocity: " + juce::String(message.getVelocity()));
+            else if (message.isNoteOff())
+                DBG("MIDI Note OFF: " + juce::String(message.getNoteNumber()));
+        }
+    }
+
+    // Process audio through sampler engine
+    samplerEngine.renderNextBlock(buffer, midiBuffer, 0, numSamples);
+
+    // Check if we're producing any audio
+    bool hasAudio = false;
+    for (int channel = 0; channel < numOutputChannels; ++channel)
+    {
+        if (outputChannelData[channel] != nullptr)
+        {
+            for (int sample = 0; sample < numSamples; ++sample)
+            {
+                if (std::abs(outputChannelData[channel][sample]) > 0.001f)
+                {
+                    hasAudio = true;
+                    break;
+                }
+            }
+        }
+        if (hasAudio) break;
+    }
+
+    if (hasAudio)
+        DBG("Audio detected in buffer!");
 
     // Apply volume control
     float volume = (float)volumeSlider.getValue();
-    bufferToFill.buffer->applyGain(bufferToFill.startSample, bufferToFill.numSamples, volume);
+    buffer.applyGain(0, numSamples, volume);
 }
 
-void MainComponent::releaseResources()
+void MainComponent::audioDeviceAboutToStart(juce::AudioIODevice* device)
 {
+    DBG("Audio device about to start: " + device->getName());
+
+    auto sampleRate = device->getCurrentSampleRate();
+    auto bufferSize = device->getCurrentBufferSizeSamples();
+
+    DBG("Sample rate: " + juce::String(sampleRate));
+    DBG("Buffer size: " + juce::String(bufferSize));
+
+    // Prepare the sampler engine
+    samplerEngine.prepareToPlay(sampleRate, bufferSize);
     keyboardState.reset();
+
+    updateAudioStatus();
+}
+
+void MainComponent::audioDeviceStopped()
+{
+    DBG("Audio device stopped");
+    keyboardState.reset();
+    updateAudioStatus();
+}
+
+void MainComponent::updateAudioStatus()
+{
+    auto* currentDevice = audioDeviceManager.getCurrentAudioDevice();
+
+    if (currentDevice != nullptr)
+    {
+        juce::String statusText = "Audio: " + currentDevice->getName() +
+            " (" + currentDevice->getTypeName() + ") - " +
+            juce::String(currentDevice->getCurrentSampleRate(), 0) + "Hz, " +
+            juce::String(currentDevice->getCurrentBufferSizeSamples()) + " samples";
+
+        audioStatusLabel.setText(statusText, juce::dontSendNotification);
+        audioStatusLabel.setColour(juce::Label::textColourId, juce::Colours::lightgreen);
+    }
+    else
+    {
+        audioStatusLabel.setText("No audio device", juce::dontSendNotification);
+        audioStatusLabel.setColour(juce::Label::textColourId, juce::Colours::red);
+    }
+}
+
+void MainComponent::showAudioSettings()
+{
+    auto audioSelector = std::make_unique<juce::AudioDeviceSelectorComponent>(
+        audioDeviceManager,
+        0, 2,  // input channels
+        2, 2,  // output channels
+        false, false,  // show MIDI
+        false, false   // stereo pairs, advanced options
+    );
+
+    audioSelector->setSize(500, 400);
+
+    juce::CallOutBox::launchAsynchronously(
+        std::move(audioSelector),
+        audioSettingsButton.getScreenBounds(),
+        nullptr
+    );
 }
 
 //==============================================================================
@@ -114,13 +235,18 @@ void MainComponent::resized()
     auto bounds = getLocalBounds();
 
     // Top section for controls
-    auto topSection = bounds.removeFromTop(200);
+    auto topSection = bounds.removeFromTop(250);
 
+    // Button row
     loadButton.setBounds(20, 100, 120, 30);
-    statusLabel.setBounds(160, 100, 400, 30);
+    audioSettingsButton.setBounds(160, 100, 120, 30);
 
-    libraryComboBox.setBounds(80, 140, 200, 25);
-    volumeSlider.setBounds(80, 170, 200, 30);
+    // Status labels
+    statusLabel.setBounds(20, 140, 600, 30);
+    audioStatusLabel.setBounds(20, 170, 600, 30);
+
+    // Volume slider
+    volumeSlider.setBounds(80, 200, 200, 30);
 
     // Bottom section for keyboard
     keyboardComponent.setBounds(bounds.removeFromBottom(100));
@@ -144,7 +270,7 @@ void MainComponent::filesDropped(const juce::StringArray& files, int /*x*/, int 
         if (filename.endsWithIgnoreCase(".sfz"))
         {
             loadSFZFile(juce::File(filename));
-            break; // Only load the first SFZ file
+            break;
         }
     }
 }
@@ -170,6 +296,48 @@ void MainComponent::buttonClicked(juce::Button* button)
                 }
             });
     }
+    else if (button == &audioSettingsButton)
+    {
+        showAudioSettings();
+    }
+}
+
+bool MainComponent::keyPressed(const juce::KeyPress& key, juce::Component* /*originatingComponent*/)
+{
+    int midiNote = -1;
+    int baseNote = 60; // Middle C
+
+    // White keys
+    if (key.getKeyCode() == 'A') midiNote = baseNote;
+    else if (key.getKeyCode() == 'S') midiNote = baseNote + 2;
+    else if (key.getKeyCode() == 'D') midiNote = baseNote + 4;
+    else if (key.getKeyCode() == 'F') midiNote = baseNote + 5;
+    else if (key.getKeyCode() == 'G') midiNote = baseNote + 7;
+    else if (key.getKeyCode() == 'H') midiNote = baseNote + 9;
+    else if (key.getKeyCode() == 'J') midiNote = baseNote + 11;
+    else if (key.getKeyCode() == 'K') midiNote = baseNote + 12;
+
+    // Black keys
+    else if (key.getKeyCode() == 'W') midiNote = baseNote + 1;
+    else if (key.getKeyCode() == 'E') midiNote = baseNote + 3;
+    else if (key.getKeyCode() == 'T') midiNote = baseNote + 6;
+    else if (key.getKeyCode() == 'Y') midiNote = baseNote + 8;
+    else if (key.getKeyCode() == 'U') midiNote = baseNote + 10;
+
+    if (midiNote >= 0 && midiNote <= 127)
+    {
+        DBG("Triggering MIDI note: " + juce::String(midiNote));
+        keyboardState.noteOn(1, midiNote, 0.8f);
+        return true;
+    }
+
+    return false;
+}
+
+bool MainComponent::keyStateChanged(bool /*isKeyDown*/, juce::Component* /*originatingComponent*/)
+{
+    keyboardState.allNotesOff(1);
+    return true;
 }
 
 void MainComponent::loadSFZFile(const juce::File& file)
@@ -178,11 +346,17 @@ void MainComponent::loadSFZFile(const juce::File& file)
     {
         updateStatusLabel("Loading " + file.getFileName() + "...");
 
-        samplerEngine.loadSampleSet(file);
-        currentSFZFile = file;
+        juce::Thread::launch([this, file]()
+            {
+                samplerEngine.loadSampleSet(file);
 
-        updateStatusLabel("Loaded: " + file.getFileNameWithoutExtension());
-        repaint();
+                juce::MessageManager::callAsync([this, file]()
+                    {
+                        currentSFZFile = file;
+                        updateStatusLabel("Loaded: " + file.getFileNameWithoutExtension());
+                        repaint();
+                    });
+            });
     }
     else
     {
@@ -193,93 +367,4 @@ void MainComponent::loadSFZFile(const juce::File& file)
 void MainComponent::updateStatusLabel(const juce::String& message)
 {
     statusLabel.setText(message, juce::dontSendNotification);
-}
-
-void MainComponent::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
-{
-    if (comboBoxThatHasChanged == &libraryComboBox)
-    {
-        auto selectedId = libraryComboBox.getSelectedId();
-        if (selectedId > 0)
-        {
-            auto sfzFiles = SampleManager::findAvailableSFZFiles();
-            if (selectedId <= sfzFiles.size())
-            {
-                loadSFZFile(juce::File(sfzFiles[selectedId - 1]));
-            }
-        }
-    }
-}
-
-void MainComponent::refreshLibraryList()
-{
-    libraryComboBox.clear();
-    libraryComboBox.addItem("Select a library...", -1);
-
-    auto sfzFiles = SampleManager::findAvailableSFZFiles();
-
-    for (int i = 0; i < sfzFiles.size(); ++i)
-    {
-        auto file = juce::File(sfzFiles[i]);
-        auto libraryName = SampleManager::getLibraryNameFromFile(file);
-        libraryComboBox.addItem(libraryName, i + 1);
-    }
-
-    if (sfzFiles.isEmpty())
-    {
-        libraryComboBox.addItem("No libraries found", -2);
-        updateStatusLabel("Place SFZ files in the Samples folder");
-    }
-}
-
-bool MainComponent::keyPressed(const juce::KeyPress& key, juce::Component* /*originatingComponent*/)
-{
-    // Map computer keyboard to piano keys
-    // Using a piano-like layout: AWSEDFTGYHUJK... (white keys on QWERTY, black keys on top row)
-
-    int midiNote = -1;
-    int baseNote = 60; // Middle C
-
-    // White keys (lower row)
-    if (key.getKeyCode() == 'A') midiNote = baseNote;      // C
-    else if (key.getKeyCode() == 'S') midiNote = baseNote + 2;  // D
-    else if (key.getKeyCode() == 'D') midiNote = baseNote + 4;  // E
-    else if (key.getKeyCode() == 'F') midiNote = baseNote + 5;  // F
-    else if (key.getKeyCode() == 'G') midiNote = baseNote + 7;  // G
-    else if (key.getKeyCode() == 'H') midiNote = baseNote + 9;  // A
-    else if (key.getKeyCode() == 'J') midiNote = baseNote + 11; // B
-    else if (key.getKeyCode() == 'K') midiNote = baseNote + 12; // C (octave up)
-
-    // Black keys (upper row)
-    else if (key.getKeyCode() == 'W') midiNote = baseNote + 1;  // C#
-    else if (key.getKeyCode() == 'E') midiNote = baseNote + 3;  // D#
-    else if (key.getKeyCode() == 'T') midiNote = baseNote + 6;  // F#
-    else if (key.getKeyCode() == 'Y') midiNote = baseNote + 8;  // G#
-    else if (key.getKeyCode() == 'U') midiNote = baseNote + 10; // A#
-
-    // Lower octave
-    else if (key.getKeyCode() == 'Z') midiNote = baseNote - 12; // C (octave down)
-    else if (key.getKeyCode() == 'X') midiNote = baseNote - 10; // D
-    else if (key.getKeyCode() == 'C') midiNote = baseNote - 8;  // E
-    else if (key.getKeyCode() == 'V') midiNote = baseNote - 7;  // F
-    else if (key.getKeyCode() == 'B') midiNote = baseNote - 5;  // G
-    else if (key.getKeyCode() == 'N') midiNote = baseNote - 3;  // A
-    else if (key.getKeyCode() == 'M') midiNote = baseNote - 1;  // B
-
-    if (midiNote >= 0 && midiNote <= 127)
-    {
-        keyboardState.noteOn(1, midiNote, 0.8f);
-        keyboardComponent.grabKeyboardFocus(); // Update visual keyboard
-        return true;
-    }
-
-    return false;
-}
-
-bool MainComponent::keyStateChanged(bool /*isKeyDown*/, juce::Component* /*originatingComponent*/)
-{
-    // Handle key releases - turn off all notes when any key is released
-    // This is a simple approach; you could make it more sophisticated
-    keyboardState.allNotesOff(1);
-    return true;
 }

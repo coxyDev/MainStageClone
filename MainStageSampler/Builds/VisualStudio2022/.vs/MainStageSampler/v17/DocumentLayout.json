@@ -3,19 +3,7 @@
   "WorkspaceRootPath": "C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Builds\\VisualStudio2022\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{6B37C520-8F1D-23AA-D75D-5F9FB4C4D4AB}|MainStageSampler_App.vcxproj|C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Source\\SampleManager.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6B37C520-8F1D-23AA-D75D-5F9FB4C4D4AB}|MainStageSampler_App.vcxproj|C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Source\\SampleManager.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{6B37C520-8F1D-23AA-D75D-5F9FB4C4D4AB}|MainStageSampler_App.vcxproj|C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Source\\SFZLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6B37C520-8F1D-23AA-D75D-5F9FB4C4D4AB}|MainStageSampler_App.vcxproj|C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Source\\MainComponent.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6B37C520-8F1D-23AA-D75D-5F9FB4C4D4AB}|MainStageSampler_App.vcxproj|C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Source\\MainComponent.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,66 +18,15 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "SampleManager.cpp",
-              "DocumentMoniker": "C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Source\\SampleManager.cpp",
-              "RelativeDocumentMoniker": "..\\..\\Source\\SampleManager.cpp",
-              "ToolTip": "C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Source\\SampleManager.cpp",
-              "RelativeToolTip": "..\\..\\Source\\SampleManager.cpp",
-              "ViewState": "AgIAACIAAAAAAAAAAAAAwEkAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-06-07T02:16:23.992Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "SampleManager.h",
-              "DocumentMoniker": "C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Source\\SampleManager.h",
-              "RelativeDocumentMoniker": "..\\..\\Source\\SampleManager.h",
-              "ToolTip": "C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Source\\SampleManager.h",
-              "RelativeToolTip": "..\\..\\Source\\SampleManager.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAAAHAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-06-07T02:16:09.066Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
               "Title": "SFZLoader.cpp",
               "DocumentMoniker": "C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Source\\SFZLoader.cpp",
               "RelativeDocumentMoniker": "..\\..\\Source\\SFZLoader.cpp",
               "ToolTip": "C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Source\\SFZLoader.cpp",
               "RelativeToolTip": "..\\..\\Source\\SFZLoader.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAALMAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-06-07T01:21:52.74Z",
+              "WhenOpened": "2025-06-07T05:02:40.499Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "MainComponent.h",
-              "DocumentMoniker": "C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Source\\MainComponent.h",
-              "RelativeDocumentMoniker": "..\\..\\Source\\MainComponent.h",
-              "ToolTip": "C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Source\\MainComponent.h",
-              "RelativeToolTip": "..\\..\\Source\\MainComponent.h",
-              "ViewState": "AgIAACMAAAAAAAAAAAAAwEoAAAACAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-06-07T01:21:21.633Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "MainComponent.cpp",
-              "DocumentMoniker": "C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Source\\MainComponent.cpp",
-              "RelativeDocumentMoniker": "..\\..\\Source\\MainComponent.cpp",
-              "ToolTip": "C:\\Users\\joelc\\Documents\\Code\\MainStageClone\\MainStageSampler\\Source\\MainComponent.cpp",
-              "RelativeToolTip": "..\\..\\Source\\MainComponent.cpp",
-              "ViewState": "AgIAAMIAAAAAAAAAAAAAwBwBAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-06-07T01:21:01.808Z"
             }
           ]
         }

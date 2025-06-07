@@ -55,3 +55,4 @@ Makefile
 
 # Samples
 *.flac
+*.wav

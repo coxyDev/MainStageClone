@@ -1,15 +1,6 @@
-/*
-  ==============================================================================
-
-    SamplerEngine.cpp
-    Created: 6 Jun 2025 12:11:00pm
-    Author:  Joel.Cox
-
-  ==============================================================================
-*/
-
 #include "SamplerEngine.h"
 #include "SampleVoice.h"
+#include "SampleSound.h"
 #include "SFZLoader.h"
 
 SamplerEngine::SamplerEngine()
@@ -33,6 +24,22 @@ void SamplerEngine::renderNextBlock(juce::AudioBuffer<float>& buffer,
     int startSample,
     int numSamples)
 {
+    // Debug MIDI messages
+    if (!midiMessages.isEmpty())
+    {
+        DBG("SamplerEngine received " + juce::String(midiMessages.getNumEvents()) + " MIDI events");
+        DBG("Synthesiser has " + juce::String(synth.getNumSounds()) + " sounds loaded");
+
+        for (const auto metadata : midiMessages)
+        {
+            auto message = metadata.getMessage();
+            if (message.isNoteOn())
+            {
+                DBG("SamplerEngine: Note ON " + juce::String(message.getNoteNumber()) + " velocity " + juce::String(message.getVelocity()));
+            }
+        }
+    }
+
     synth.renderNextBlock(buffer, midiMessages, startSample, numSamples);
 }
 
