@@ -136,6 +136,33 @@ void EnhancedSFZLoader::parseLine(const juce::String& line)
         return;
     }
 
+    // Handle complex lines that mix section headers with other content
+    // Example: "<group> #include "Data/vel_01.txt" lovel=1 hivel=26"
+    // Example: "<region> region_label=01 key=21 sample=rel1.$EXT"
+    if (line.startsWith("<") && line.contains(">") &&
+        (line.contains("#include") || line.contains("=")))
+    {
+        DBG("Complex line: " + line);
+
+        // Find the end of the section header
+        int headerEnd = line.indexOf(">");
+        if (headerEnd > 0)
+        {
+            juce::String header = line.substring(0, headerEnd + 1);
+            juce::String remainder = line.substring(headerEnd + 1).trim();
+
+            DBG("  Header: " + header);
+            DBG("  Remainder: " + remainder);
+
+            // Process the header first
+            handleSectionHeader(header);
+
+            // Now process the remainder as separate elements
+            parseComplexRemainder(remainder);
+        }
+        return;
+    }
+
     // Handle opcodes (key=value pairs)
     if (line.contains("="))
     {
@@ -157,6 +184,103 @@ void EnhancedSFZLoader::parseLine(const juce::String& line)
     if (line.trim().isNotEmpty())
     {
         DBG("Unhandled line: '" + line + "'");
+    }
+}
+
+void EnhancedSFZLoader::parseComplexRemainder(const juce::String& remainder)
+{
+    DBG("Parsing complex remainder: " + remainder);
+
+    // Simple tokenization by spaces, handling quoted strings
+    juce::StringArray parts;
+
+    // Use a more robust tokenizer that handles quotes properly
+    juce::String current;
+    bool inQuotes = false;
+
+    for (int i = 0; i < remainder.length(); ++i)
+    {
+        juce::juce_wchar ch = remainder[i];
+
+        if (ch == '"')
+        {
+            inQuotes = !inQuotes;
+            current += ch;
+        }
+        else if (ch == ' ' && !inQuotes)
+        {
+            if (current.trim().isNotEmpty())
+            {
+                parts.add(current.trim());
+                current = juce::String();
+            }
+        }
+        else
+        {
+            current += ch;
+        }
+    }
+
+    // Add the last part
+    if (current.trim().isNotEmpty())
+    {
+        parts.add(current.trim());
+    }
+
+    // Debug: show all parts found
+    DBG("  Found " + juce::String(parts.size()) + " parts:");
+    for (int i = 0; i < parts.size(); ++i)
+    {
+        DBG("    Part " + juce::String(i) + ": '" + parts[i] + "'");
+    }
+
+    // Process parts in order: includes first, then opcodes
+    juce::StringArray includes;
+    juce::StringArray opcodes;
+
+    for (int i = 0; i < parts.size(); ++i)
+    {
+        auto part = parts[i];
+
+        if (part == "#include")
+        {
+            // Next part should be the filename
+            if (i + 1 < parts.size())
+            {
+                auto filename = parts[i + 1];
+                juce::String includeCommand = part + " " + filename;
+                includes.add(includeCommand);
+                i++; // Skip the filename part
+            }
+        }
+        else if (part.contains("="))
+        {
+            opcodes.add(part);
+        }
+    }
+
+    // Process includes first (they may define variables needed by opcodes)
+    for (const auto& includeCmd : includes)
+    {
+        DBG("  Processing include: " + includeCmd);
+        handleInclude(includeCmd);
+    }
+
+    // Then process opcodes
+    for (const auto& opcodeStr : opcodes)
+    {
+        auto eqPos = opcodeStr.indexOf("=");
+        if (eqPos > 0)
+        {
+            auto key = opcodeStr.substring(0, eqPos).trim();
+            auto value = opcodeStr.substring(eqPos + 1).trim();
+
+            // Substitute variables
+            value = substituteVariables(value);
+
+            DBG("  Processing opcode: " + key + " = " + value);
+            handleOpcode(key, value);
+        }
     }
 }
 
