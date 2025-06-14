@@ -116,6 +116,8 @@ void EnhancedSFZLoader::parseLine(const juce::String& line)
     if (line.isEmpty() || line.startsWith("//"))
         return;
 
+    DBG("Parsing line: " + line);
+
     // Handle preprocessor directives
     if (line.startsWith("#define"))
     {
@@ -129,37 +131,35 @@ void EnhancedSFZLoader::parseLine(const juce::String& line)
         return;
     }
 
-    // Handle section headers
-    if (line.startsWith("<") && line.endsWith(">"))
+    // Handle complex lines that start with section headers but have more content
+    if (line.startsWith("<") && line.contains(">"))
     {
-        handleSectionHeader(line);
-        return;
-    }
-
-    // Handle complex lines that mix section headers with other content
-    // Example: "<group> #include "Data/vel_01.txt" lovel=1 hivel=26"
-    // Example: "<region> region_label=01 key=21 sample=rel1.$EXT"
-    if (line.startsWith("<") && line.contains(">") &&
-        (line.contains("#include") || line.contains("=")))
-    {
-        DBG("Complex line: " + line);
-
-        // Find the end of the section header
-        int headerEnd = line.indexOf(">");
-        if (headerEnd > 0)
+        auto closeBracket = line.indexOf(">");
+        if (closeBracket > 0)
         {
-            juce::String header = line.substring(0, headerEnd + 1);
-            juce::String remainder = line.substring(headerEnd + 1).trim();
+            auto header = line.substring(0, closeBracket + 1);
+            auto remainder = line.substring(closeBracket + 1).trim();
 
+            DBG("Complex line: " + line);
             DBG("  Header: " + header);
             DBG("  Remainder: " + remainder);
 
             // Process the header first
             handleSectionHeader(header);
 
-            // Now process the remainder as separate elements
-            parseComplexRemainder(remainder);
+            // Process the remainder if it exists
+            if (remainder.isNotEmpty())
+            {
+                parseComplexRemainder(remainder);
+            }
+            return;
         }
+    }
+
+    // Handle simple section headers
+    if (line.startsWith("<") && line.endsWith(">"))
+    {
+        handleSectionHeader(line);
         return;
     }
 
@@ -191,95 +191,70 @@ void EnhancedSFZLoader::parseComplexRemainder(const juce::String& remainder)
 {
     DBG("Parsing complex remainder: " + remainder);
 
-    // Simple tokenization by spaces, handling quoted strings
+    // Split by spaces but keep quoted strings together
     juce::StringArray parts;
-
-    // Use a more robust tokenizer that handles quotes properly
-    juce::String current;
     bool inQuotes = false;
+    juce::String currentPart;
 
     for (int i = 0; i < remainder.length(); ++i)
     {
-        juce::juce_wchar ch = remainder[i];
+        juce::juce_wchar c = remainder[i];
 
-        if (ch == '"')
+        if (c == '"')
         {
             inQuotes = !inQuotes;
-            current += ch;
+            currentPart += c;
         }
-        else if (ch == ' ' && !inQuotes)
+        else if (c == ' ' && !inQuotes)
         {
-            if (current.trim().isNotEmpty())
+            if (currentPart.isNotEmpty())
             {
-                parts.add(current.trim());
-                current = juce::String();
+                parts.add(currentPart.trim());
+                currentPart.clear();
             }
         }
         else
         {
-            current += ch;
+            currentPart += c;
         }
     }
 
     // Add the last part
-    if (current.trim().isNotEmpty())
+    if (currentPart.isNotEmpty())
     {
-        parts.add(current.trim());
+        parts.add(currentPart.trim());
     }
 
-    // Debug: show all parts found
     DBG("  Found " + juce::String(parts.size()) + " parts:");
     for (int i = 0; i < parts.size(); ++i)
     {
         DBG("    Part " + juce::String(i) + ": '" + parts[i] + "'");
     }
 
-    // Process parts in order: includes first, then opcodes
-    juce::StringArray includes;
-    juce::StringArray opcodes;
-
-    for (int i = 0; i < parts.size(); ++i)
+    // Process each part
+    for (const auto& part : parts)
     {
-        auto part = parts[i];
-
-        if (part == "#include")
+        if (part.startsWith("#include"))
         {
-            // Next part should be the filename
-            if (i + 1 < parts.size())
-            {
-                auto filename = parts[i + 1];
-                juce::String includeCommand = part + " " + filename;
-                includes.add(includeCommand);
-                i++; // Skip the filename part
-            }
+            DBG("  Processing include: " + part);
+            handleInclude(part);
         }
         else if (part.contains("="))
         {
-            opcodes.add(part);
+            auto tokens = juce::StringArray::fromTokens(part, "=", "");
+            if (tokens.size() >= 2)
+            {
+                auto key = tokens[0].trim();
+                auto value = tokens[1].trim();
+                value = substituteVariables(value);
+
+                DBG("  Processing opcode: " + key + " = " + value);
+                handleOpcode(key, value);
+            }
         }
-    }
-
-    // Process includes first (they may define variables needed by opcodes)
-    for (const auto& includeCmd : includes)
-    {
-        DBG("  Processing include: " + includeCmd);
-        handleInclude(includeCmd);
-    }
-
-    // Then process opcodes
-    for (const auto& opcodeStr : opcodes)
-    {
-        auto eqPos = opcodeStr.indexOf("=");
-        if (eqPos > 0)
+        else if (part.isNotEmpty())
         {
-            auto key = opcodeStr.substring(0, eqPos).trim();
-            auto value = opcodeStr.substring(eqPos + 1).trim();
-
-            // Substitute variables
-            value = substituteVariables(value);
-
-            DBG("  Processing opcode: " + key + " = " + value);
-            handleOpcode(key, value);
+            DBG("  Unhandled part: " + part);
         }
     }
 }
@@ -474,6 +449,14 @@ void EnhancedSFZLoader::applyOpcodeToRegion(const juce::String& key, const juce:
     {
         region.transpose = juce::jlimit(-127, 127, value.getIntValue());
     }
+    else if (key == "ampeg_attack")
+    {
+        region.ampeg_attack = juce::jmax(0.0, value.getDoubleValue());
+    }
+    else if (key == "ampeg_release")
+    {
+        region.ampeg_release = juce::jmax(0.0, value.getDoubleValue());
+    }
     // Add other opcodes as needed...
 }
 
@@ -560,6 +543,12 @@ void EnhancedSFZLoader::applyOpcodeToRegionDirect(SFZRegion& region, const juce:
         region.lokey = parseNoteValue(value);
     else if (key == "hikey")
         region.hikey = parseNoteValue(value);
+    else if (key == "lovel")
+        region.lovel = juce::jlimit(0, 127, value.getIntValue());
+    else if (key == "hivel")
+        region.hivel = juce::jlimit(0, 127, value.getIntValue());
+    else if (key == "pitch_keycenter")
+        region.pitch_keycenter = parseNoteValue(value);
     // Add other opcodes as needed...
 }
 

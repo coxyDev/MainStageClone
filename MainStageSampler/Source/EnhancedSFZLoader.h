@@ -140,6 +140,9 @@ private:
     /** Parse a single line of SFZ content */
     void parseLine(const juce::String& line);
 
+    /** Parse complex remainder from lines like <group> #include "file" lovel=1 */
+    void parseComplexRemainder(const juce::String& remainder);
+
     /** Handle #define variables */
     void handleDefine(const juce::String& line);
 
