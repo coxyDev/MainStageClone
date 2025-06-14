@@ -33,6 +33,9 @@ void SampleVoice::startNote(int midiNoteNumber, float velocity,
 {
     if (auto* sound = dynamic_cast<const SampleSound*> (s))
     {
+        DBG("SampleVoice: Starting note " + juce::String(midiNoteNumber) +
+            " with sound: " + sound->getName());
+
         pitchRatio = std::pow(2.0, (midiNoteNumber - sound->getRootMidiNote()) / 12.0);
         sourceSamplePosition = 0.0;
 
@@ -46,9 +49,12 @@ void SampleVoice::startNote(int midiNoteNumber, float velocity,
 
         adsr.setSampleRate(getSampleRate());
         adsr.noteOn();
+
+        DBG("SampleVoice: Note started successfully, pitch ratio: " + juce::String(pitchRatio));
     }
     else
     {
+        DBG("SampleVoice: ERROR - Cannot cast sound to SampleSound!");
         jassertfalse; // this object can only play SampleSounds!
     }
 }
@@ -81,6 +87,14 @@ void SampleVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int st
     if (auto* playingSound = static_cast<SampleSound*> (getCurrentlyPlayingSound().get()))
     {
         auto& data = *playingSound->getAudioData();
+
+        if (data.getNumSamples() == 0)
+        {
+            DBG("SampleVoice: WARNING - Audio data is empty!");
+            clearCurrentNote();
+            return;
+        }
+
         const float* const inL = data.getReadPointer(0);
         const float* const inR = data.getNumChannels() > 1 ? data.getReadPointer(1) : nullptr;
 
@@ -93,10 +107,16 @@ void SampleVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int st
             auto alpha = (float)(sourceSamplePosition - pos);
             auto invAlpha = 1.0f - alpha;
 
+            // Bounds checking
+            if (pos >= data.getNumSamples() - 1)
+            {
+                stopNote(0.0f, false);
+                break;
+            }
+
             // simple linear interpolation..
             float l = (inL[pos] * invAlpha + inL[pos + 1] * alpha);
-            float r = (inR != nullptr) ? (inR[pos] * invAlpha + inR[pos + 1] * alpha)
-                : l;
+            float r = (inR != nullptr) ? (inR[pos] * invAlpha + inR[pos + 1] * alpha) : l;
 
             auto envelopeValue = adsr.getNextSample();
 
@@ -115,7 +135,7 @@ void SampleVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int st
 
             sourceSamplePosition += pitchRatio;
 
-            if (sourceSamplePosition > data.getNumSamples())
+            if (sourceSamplePosition >= data.getNumSamples())
             {
                 stopNote(0.0f, false);
                 break;

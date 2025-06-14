@@ -1,0 +1,12 @@
+//Simple test SFZ - save this as "test.sfz" in your Salamander directory
+
+<control>
+default_path=Samples/
+
+<region>
+sample=A0v1.flac
+lokey=21
+hikey=21
+pitch_keycenter=21
+lovel=0
+hivel=127

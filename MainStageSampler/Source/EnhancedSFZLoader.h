@@ -48,6 +48,10 @@ private:
 
     struct SFZRegion
     {
+        // Hierarchy tracking
+        int masterIndex = -1;
+        int groupIndex = -1;
+
         // Basic sample info
         juce::String sample;
         int lokey = 0;
@@ -109,6 +113,7 @@ private:
 
     struct SFZGroup
     {
+        int masterIndex = -1;
         juce::Array<SFZOpcode> opcodes;
     };
 
@@ -126,6 +131,7 @@ private:
 
     juce::File currentSFZFile;
     juce::AudioFormatManager formatManager;
+    juce::String defaultPath; // Store default_path from <control> section
 
     //==============================================================================
     /** Process the main SFZ file and all includes */
@@ -146,11 +152,23 @@ private:
     /** Parse key=value opcodes */
     void handleOpcode(const juce::String& key, const juce::String& value);
 
+    /** Apply opcode to region */
+    void applyOpcodeToRegion(const juce::String& key, const juce::String& value);
+
+    /** Apply opcode directly to region (used during inheritance) */
+    void applyOpcodeToRegionDirect(SFZRegion& region, const juce::String& key, const juce::String& value);
+
+    /** Parse note values (handles note names like C4, A0) */
+    int parseNoteValue(const juce::String& value);
+
     /** Substitute variables in a string */
     juce::String substituteVariables(const juce::String& input);
 
     /** Apply inheritance: master -> group -> region */
     void applyInheritance();
+
+    /** Check if region already has an opcode */
+    bool hasOpcode(const SFZRegion& region, const juce::String& key);
 
     /** Convert parsed regions to SampleSound objects */
     juce::Array<SampleSound::Ptr> createSampleSounds();
@@ -160,21 +178,6 @@ private:
 
     /** Load audio file with proper error handling */
     std::unique_ptr<juce::AudioBuffer<float>> loadAudioFile(const juce::File& audioFile);
-
-    /** Apply opcode to appropriate structure */
-    void applyOpcodeToMaster(const juce::String& key, const juce::String& value);
-    void applyOpcodeToGroup(const juce::String& key, const juce::String& value);
-    void applyOpcodeToRegion(const juce::String& key, const juce::String& value);
-
-    /** Parse various opcode types */
-    int parseIntOpcode(const juce::String& value);
-    double parseFloatOpcode(const juce::String& value);
-    bool parseBoolOpcode(const juce::String& value);
-
-    /** Validate and clamp values */
-    int clampMidiNote(int note);
-    int clampVelocity(int velocity);
-    double clampGain(double gain);
 
     /** Current parsing context */
     enum class ParseContext
